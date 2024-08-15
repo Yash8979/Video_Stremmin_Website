@@ -1,0 +1,60 @@
+Report ztest_anj.
+Tables: mara, marc, mard.
+SELECT-OTIONS: so_matnr FOR mara-matnr,
+               so_werks FOR marc-werks,
+               so_lgort FOR mard-lgort.
+
+TYPES: BEGIN OF ty_data,
+        martnr TYPE mara-matnr,
+        werks TYPE mard-werks,
+        lgort TYPE mard-lgort,
+       END OF ty_data.
+
+DATA:gt_data TYPE TABLE OF ty_data,
+     gt_fieldcat TYPE slis_t_fieldcat_alv,
+     gs_fieldcat TYPE slis_fieldcat_alv.
+
+SELECT: a~matnr
+        b~werks
+        C~lgort
+    FROM mara AS a 
+    INNER JOIN marc AS b  
+    ON a~matnr = b~matnr
+    INNER JOIN mard AS c  
+    ON a~matnr = C~matnr
+    AND b~werks = C~werks                             
+    INTO TABLE @gt_data
+    WHERE a~matnr IN @so_matnr
+    AND   b~werks IN @so_werks
+    AND   c~lgort IN @so_lgort.
+
+    IF sy-subrc = 0.
+       SORT gt_data BY matnr werks lgort.
+    ENDIF.
+
+CLEAR: gs_fieldcat.
+gs_fieldcat-col_pos   = 1.
+gs_fieldcat-outputlen = 40.
+gs_fieldcat-seltextm  = 'MATERIAL'.
+gs_fieldcat-fieldname = 'matnr'.
+gs_fieldcat-ref_fielname = 'matnr'.
+gs_fieldcat-ref_tabname  = 'mara'.
+APPEND gs_fieldcat TO gt_fieldcat.
+
+CLEAR: gs_fieldcat.
+gs_fieldcat-col_pos   = 2.
+gs_fieldcat-outputlen = 4.
+gs_fieldcat-seltextm  = 'PLANT'.
+gs_fieldcat-fieldname = 'werks'.
+gs_fieldcat-ref_fielname = 'werks'.
+gs_fieldcat-ref_tabname  = 'marc'.
+APPEND gs_fieldcat TO gt_fieldcat.
+
+CLEAR: gs_fieldcat.
+gs_fieldcat-col_pos   = 3.
+gs_fieldcat-outputlen = 4.
+gs_fieldcat-seltextm  = 'STROAGE'.
+gs_fieldcat-fieldname = 'lgort'.
+gs_fieldcat-ref_fielname = 'lgort'.
+gs_fieldcat-ref_tabname  = 'mard'.
+APPEND gs_fieldcat
